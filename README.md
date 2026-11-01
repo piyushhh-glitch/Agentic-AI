@@ -1,2 +1,2 @@
 # Agentic-AI
-Agentic AI using CrewAI 
+Agentic AI using LangGraph
