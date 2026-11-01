@@ -1,29 +1,47 @@
-from crewai import Agent , LLM 
+from typing import TypedDict
+
+from langchain_groq import ChatGroq
+from langgraph.graph import StateGraph,START,END
 from dotenv import load_dotenv
-import os 
 
 load_dotenv()
 
-groq_api_key=os.getenv("GROQ_API_KEY")
-
-llm=LLM(
-    model="openai/openai/gpt-oss-20b",
-    base_url="https://api.groq.com/openai/v1",
-    api_key=groq_api_key,
-    custom_openai=True
+llm=ChatGroq(
+    model="openai/gpt-oss-20b",
+    temperature=0
 )
 
-agent=Agent(
-    role="AI Assistant",
-    goal="Provice clear and accurate answer to user's question",
-    backstory="You are a helpful AI assistant skilled at explaining technical concepts",
-    llm=llm,
-    verbose=True
+class State(TypedDict):
+    question: str
+    answer: str
+
+def math_agent(state:State):
+    response=llm.invoke(
+        [
+            ("system","You are a helpful AI Assistant.Help in calculations in simple english language"),
+            ("human",state['question'])
+        ]
+    )
+
+    return {"answer":response.content}
+
+builder=StateGraph(State)
+
+builder.add_node("math_agent",math_agent)
+
+builder.add_edge(START,"math_agent")
+builder.add_edge("math_agent",END)
+
+graph=builder.compile()
+
+result=graph.invoke(
+    {
+        "question":"If a train travels 120 km in 2 hours, calculate its speed.",
+        "answer":""
+    }
 )
 
-response=agent.kickoff(
-    "Explain what Machine Learning in simple terms"
-)
+print("Question:",result["question"])
+print("Answer:",result["answer"])
 
-print("/n Final Answer:")
-print(response)
+
