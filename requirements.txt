@@ -2,3 +2,11 @@ langchain
 langgraph
 langchain-groq
 python-dotenv
+
+langchain-community
+
+langchain-huggingface
+sentence-transformers
+faiss-cpu
+
+pypdf
